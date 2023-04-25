@@ -18,6 +18,7 @@ using Newtonsoft.Json;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Net;
+using System.Net.Sockets;
 
 namespace auth
 {
@@ -26,7 +27,10 @@ namespace auth
     // <\\summary>
     public partial class MainWindow : Window
     {
-        static List<user> users = new List<user>();
+
+        
+        
+        static List<User> users = new List<User>();
         public MainWindow()
         {
             InitializeComponent();
@@ -34,83 +38,99 @@ namespace auth
             {
                 File.WriteAllText("..\\..\\..\\..\\..\\infa.json", "");
             }
-            users = JsonConvert.DeserializeObject<List<user>>(File.ReadAllText("..\\..\\..\\..\\..\\infa.json")) ?? new List<user>();
+            users = JsonConvert.DeserializeObject<List<User>>(File.ReadAllText("..\\..\\..\\..\\..\\infa.json")) ?? new List<User>();
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            if (tb.Text == "")
+            if (tb.Text.Length == 0)
             {
-                MessageBox.Show("Кто ты, воин?");
+                MessageBox.Show("Пустое поле имени пользователя неприемлено");
                 return;
             }
+            
             if (users.Count != 0)
             {
-
-                if (users[0].server_power == "on" || users[1].server_power == "on")
+                for (int i = 0; i < users.Count; i++)
                 {
-                    MessageBox.Show("Крч, ты опоздал, сервак уже создан ¯\\_(ツ)_/¯");
-                    return;
+                    if (users[i].name == tb.Text)
+                    {
+                        MessageBox.Show("Такой пользователь уже есть на сервере");
+                        return;
+                    }
+
                 }
             }
-            let_s_go();
-            open("..\\..\\..\\..\\..\\WpfApp1\\WpfApp1\\bin\\Debug\\net6.0-windows\\WpfApp1.exe");
+
+            WriteData();
+            Open("C:\\Users\\mansu\\prak6\\WpfApp1\\WpfApp1\\bin\\Debug\\net6.0-windows\\WpfApp1.exe");
+
         }
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
-            if (IP.Text == "")
+            if (tb.Text.Length == 0)
             {
-                MessageBox.Show("А где суету, собственно, будем наводить???");
-                return;
-            }
-            if (tb.Text == "")
-            {
-                MessageBox.Show("Кто ты, воин?");
-                return;
-            }
-            if (JsonConvert.DeserializeObject<List<user>>(File.ReadAllText("..\\..\\..\\..\\..\\infa.json")) != null)
-            {
-                if (users.Count == 2)
-                {
-                    MessageBox.Show("Ну вот где ты раньше то был?? Сервак забит, сорян, попроси там кентов выйти, чтобы ты зашел ¯\\_(ツ)_/¯");
-                    return;
-                }
-            }
-            else
-            {
-                MessageBox.Show("Сорян кнчн, но сервак вырублен ¯\\_(ツ)_/¯");
+                MessageBox.Show("Пустое поле имени пользователя неприемлено");
                 return;
             }
 
-            Regex reg = new Regex(@"^[1-9]{3}.[0-9].[0-9].[0-9]");
-            if (!reg.IsMatch(IP.Text))
+            if (IP.Text.Length == 0)
             {
-                MessageBox.Show("Куда мы лезим... ¯\\_(ツ)_/¯ (Введи норм IP)");
+                MessageBox.Show("Адрес не может быть пустым");
                 return;
             }
-            let_s_go();
-            open("..\\..\\..\\..\\..\\client\\client\\bin\\Debug\\net6.0-windows\\client.exe");
+
+            if (users.Count != 0)
+            {
+                for (int i = 0; i < users.Count; i++)
+                {
+                    if (users[i].name == tb.Text)
+                    {
+                        MessageBox.Show("Такой пользователь уже есть на сервере");
+                        return;
+                    }
+
+                }
+            }
+
+
+            Regex reg = new Regex(@"^[1-9]{3}.[0-9].[0-9].[0-9]");
+
+            if (!reg.IsMatch(IP.Text))
+            {
+                MessageBox.Show("Некорректный IP адрес");
+                return;
+            }
+
+            else
+            {
+                WriteData();
+                Open("..\\..\\..\\..\\..\\client\\client\\bin\\Debug\\net6.0-windows\\client.exe");
+            }
+            
+
+            
         }
-        void open(string path)
+        void Open(string path)
         {
             Process.Start(new ProcessStartInfo { FileName = path, UseShellExecute = true });
             Close();
         }
-        void let_s_go()
+        void WriteData()
         {
-            users.Add(new user("on", tb.Text));
+            users.Add(new User(true, tb.Text));
             File.WriteAllText("..\\..\\..\\..\\..\\infa.json", JsonConvert.SerializeObject(users));
         }
     }
-    class user
+    class User
     {
-        public string server_power;
+        public bool Is_On;
         public string name;
 
-        public user(string server_power, string name)
+        public User(bool on, string name)
         {
-            this.server_power = server_power;
+            this.Is_On = on;
             this.name = name;
         }
     }

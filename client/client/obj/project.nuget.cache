@@ -1,10 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "REUET4dw8qzgIb5xWAn5PuniMFF9z0liQeBs1NZPX74ihyUHrDltWbfhYxNjtgrc1g8vHOWGRsXEWkwrILayhg==",
+  "dgSpecHash": "6QJghkHOssbjEjcE919IBitFWLkiBlZannSgGku7ZNLPkQb0N+8MyHW9a1PXfWsGDnlArCsF/SEO6dVRkmrgMg==",
   "success": true,
-  "projectFilePath": "C:\\Users\\user\\Desktop\\prak6_\\client\\client\\client.csproj",
+  "projectFilePath": "C:\\Users\\mansu\\prak6\\client\\client\\client.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\user\\.nuget\\packages\\newtonsoft.json\\13.0.3\\newtonsoft.json.13.0.3.nupkg.sha512"
+    "C:\\Users\\mansu\\.nuget\\packages\\newtonsoft.json\\13.0.3\\newtonsoft.json.13.0.3.nupkg.sha512"
   ],
   "logs": []
 }

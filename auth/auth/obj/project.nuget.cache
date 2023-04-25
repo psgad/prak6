@@ -1,10 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "7AfTCXdQjSRZRfL2gFOiDY38cGIRCBVfaRqZ0TNo0S4O3//ElX2WDb8UML6wF1qo6TngxjLs993ODUgw9eJkNw==",
+  "dgSpecHash": "zuLJGTVOw+fx02a4lOZsujTQSm9ixOqHxiZ6fDk3V8CWDwLwxjyzqDh5AdfSkTZ6rUbuFaNctii+3wS5Bp55TA==",
   "success": true,
-  "projectFilePath": "C:\\Users\\user\\Desktop\\prak6_\\auth\\auth\\auth.csproj",
+  "projectFilePath": "C:\\Users\\mansu\\prak6\\auth\\auth\\auth.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\user\\.nuget\\packages\\newtonsoft.json\\13.0.3\\newtonsoft.json.13.0.3.nupkg.sha512"
+    "C:\\Users\\mansu\\.nuget\\packages\\newtonsoft.json\\13.0.3\\newtonsoft.json.13.0.3.nupkg.sha512"
   ],
   "logs": []
 }

@@ -50,13 +50,13 @@ namespace client
                 messages.Items.Add(mess);
             }
         }
-        async Task SendMessage(string message)
+        async Task SendMessage(string message) // отправка сообщений
         {
             byte[] bytes = Encoding.UTF8.GetBytes(message);
             await client.SendAsync(bytes, SocketFlags.None);
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void Button_Click(object sender, RoutedEventArgs e) // нажатие на кнопку
         {
             SendMessage(message_text.Text);
         }

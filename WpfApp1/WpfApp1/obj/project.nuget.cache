@@ -1,10 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "fh5H/oXeuztxMF6xSnLyM4gss6ENfoaSoWXF6h8wagBzoFGUpaj9TBqaBgIR4zFKUEJ4d6MGvAl3zaNt67ZBrw==",
+  "dgSpecHash": "XWRFe6CUk4er11RiArPinTZ6K2hWF61fQTOcg0Z5i/jhWosAbAPQiyNY1ZziYpioHc3k26ybb0WL6MlHVx1Cng==",
   "success": true,
-  "projectFilePath": "C:\\Users\\user\\Desktop\\prak6_\\WpfApp1\\WpfApp1\\WpfApp1.csproj",
+  "projectFilePath": "C:\\Users\\mansu\\prak6\\WpfApp1\\WpfApp1\\WpfApp1.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\user\\.nuget\\packages\\newtonsoft.json\\13.0.3\\newtonsoft.json.13.0.3.nupkg.sha512"
+    "C:\\Users\\mansu\\.nuget\\packages\\newtonsoft.json\\13.0.3\\newtonsoft.json.13.0.3.nupkg.sha512"
   ],
   "logs": []
 }
