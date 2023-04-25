@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:client"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="450" Width="800" Closed="Window_Closed">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="175*"/>
@@ -18,7 +18,7 @@
             <RowDefinition Height="37*"/>
         </Grid.RowDefinitions>
         <TextBox x:Name="message_text" Margin="86,0,0,0" TextWrapping="Wrap" Height="37" VerticalAlignment="Center" Grid.Row="2" Grid.Column="1"/>
-        <Button Content="Выйти" HorizontalAlignment="Left" Width="86" FontSize="22" Grid.Row="2" Grid.Column="1" Height="37" VerticalAlignment="Center"/>
+        <Button Content="Выйти" HorizontalAlignment="Left" Width="86" FontSize="22" Grid.Row="1" Grid.Column="1" Height="37" VerticalAlignment="Bottom" Grid.RowSpan="2" Click="Button_Click_1"/>
         <Button Content="Отправить" FontSize="22" Height="37" VerticalAlignment="Center" Grid.Row="2" Click="Button_Click" Grid.Column="2"/>
         <ListBox x:Name="messages" d:ItemsSource="{d:SampleData ItemCount=5}" Grid.RowSpan="2" Grid.Column="1" Grid.ColumnSpan="2"/>
         <ListBox x:Name="users"  HorizontalAlignment="Center" Width="176" Margin="0,32,0,0" Grid.RowSpan="3"/>

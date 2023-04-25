@@ -34,6 +34,7 @@ namespace WpfApp1
                 Process.Start(new ProcessStartInfo { FileName = pyt("auth\\auth\\bin\\Debug\\net6.0-windows\\auth.exe"), UseShellExecute = true });
                 Environment.Exit(0);
             }
+            File.WriteAllText(pyt("mogu.txt"), "0");
             userk.Clear();
             foreach (des r in JsonConvert.DeserializeObject<List<des>>(File.ReadAllText(pyt("infa.json"))))
             {
@@ -42,7 +43,7 @@ namespace WpfApp1
             users.ItemsSource = userk;
             server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             server.Bind(new IPEndPoint(IPAddress.Any, 8888));
-            server.Listen(2);
+            server.Listen(1000);
             ListenToClient();
             admins();
             //           MessageBox.Show($"IP, к которому будут подключаться люди, для общения: {Dns.GetHostEntry(Dns.GetHostName()).AddressList[2]}");
@@ -87,7 +88,6 @@ namespace WpfApp1
                 {
                     SendMessage(item, mess);
                 }
-
             }
         }
 
@@ -126,8 +126,8 @@ namespace WpfApp1
         {
             write(pyt("infa.json"));
             write(pyt("logi.json"));
-            Close();
             Process.Start(new ProcessStartInfo { FileName = pyt("\\auth\\auth\\bin\\Debug\\net6.0-windows\\auth.exe"), UseShellExecute = true });
+            Environment.Exit(0);
         }
         string pyt(string paths)
         {

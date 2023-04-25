@@ -70,15 +70,7 @@ namespace auth
                 MessageBox.Show("Кто ты, воин?");
                 return;
             }
-            if (JsonConvert.DeserializeObject<List<user>>(File.ReadAllText("..\\..\\..\\..\\..\\infa.json")) != null)
-            {
-                if (users.Count == 2)
-                {
-                    MessageBox.Show("Ну вот где ты раньше то был?? Сервак забит, сорян, попроси там кентов выйти, чтобы ты зашел ¯\\_(ツ)_/¯");  
-                    return;
-                }
-            }
-            else
+            if (JsonConvert.DeserializeObject<List<user>>(File.ReadAllText("..\\..\\..\\..\\..\\infa.json")) == null)
             {
                 MessageBox.Show("Сорян кнчн, но сервак вырублен ¯\\_(ツ)_/¯");
                 return;
