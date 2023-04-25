@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -29,6 +30,15 @@ namespace client
         public MainWindow()
         {
             InitializeComponent();
+            if (!File.Exists("..\\..\\..\\..\\..\\mogu.txt"))
+            {
+                File.WriteAllText("..\\..\\..\\..\\..\\mogu.txt", "0");
+            }
+            if (File.ReadAllText("..\\..\\..\\..\\..\\mogu.txt") == "0")
+            {
+                Close();
+                Process.Start(new ProcessStartInfo { FileName = "..\\..\\..\\..\\..\\auth\\auth\\bin\\Debug\\net6.0-windows\\auth.exe", UseShellExecute = true });
+            }
             client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             client.ConnectAsync(Dns.GetHostEntry(Dns.GetHostName()).AddressList[2], 8888);
             Resave();

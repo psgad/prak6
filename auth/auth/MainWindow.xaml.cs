@@ -47,7 +47,7 @@ namespace auth
             if (users.Count != 0)
             {
 
-                if (users[0].server_power == "on" || users[1].server_power == "on")
+                if (users[0].server_power == "on")
                 {
                     MessageBox.Show("Крч, ты опоздал, сервак уже создан ¯\\_(ツ)_/¯");
                     return;
@@ -59,6 +59,7 @@ namespace auth
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
+            users = JsonConvert.DeserializeObject<List<user>>(File.ReadAllText("..\\..\\..\\..\\..\\infa.json")) ?? new List<user>();
             if (IP.Text == "")
             {
                 MessageBox.Show("А где суету, собственно, будем наводить???");
@@ -73,7 +74,7 @@ namespace auth
             {
                 if (users.Count == 2)
                 {
-                    MessageBox.Show("Ну вот где ты раньше то был?? Сервак забит, сорян, попроси там кентов выйти, чтобы ты зашел ¯\\_(ツ)_/¯");
+                    MessageBox.Show("Ну вот где ты раньше то был?? Сервак забит, сорян, попроси там кентов выйти, чтобы ты зашел ¯\\_(ツ)_/¯");  
                     return;
                 }
             }
@@ -94,6 +95,7 @@ namespace auth
         }
         void open(string path)
         {
+            File.WriteAllText("..\\..\\..\\..\\..\\mogu.txt", "1");
             Process.Start(new ProcessStartInfo { FileName = path, UseShellExecute = true });
             Close();
         }

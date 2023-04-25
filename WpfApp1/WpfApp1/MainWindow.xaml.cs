@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -24,8 +25,17 @@ namespace WpfApp1
         public MainWindow()
         {
             InitializeComponent();
+            if (!File.Exists(pyt("mogu.txt")))
+            {
+                File.WriteAllText(pyt("mogu.txt"), "0");
+            }
+            if (File.ReadAllText(pyt("mogu.txt")) == "0")
+            {
+                Process.Start(new ProcessStartInfo { FileName = pyt("auth\\auth\\bin\\Debug\\net6.0-windows\\auth.exe"), UseShellExecute = true });
+                Environment.Exit(0);
+            }
             userk.Clear();
-            foreach (des r in JsonConvert.DeserializeObject<List<des>>(File.ReadAllText("..\\..\\..\\..\\..\\infa.json")))
+            foreach (des r in JsonConvert.DeserializeObject<List<des>>(File.ReadAllText(pyt("infa.json"))))
             {
                 userk.Add(r.name);
             }
@@ -52,7 +62,7 @@ namespace WpfApp1
                 clients.Add(client);
                 users.ItemsSource = null;
                 userk.Clear();
-                foreach (des r in JsonConvert.DeserializeObject<List<des>>(File.ReadAllText("..\\..\\..\\..\\..\\infa.json")))
+                foreach (des r in JsonConvert.DeserializeObject<List<des>>(File.ReadAllText(pyt("infa.json"))))
                 {
                     userk.Add(r.name);
                 }
@@ -92,7 +102,7 @@ namespace WpfApp1
                 if (clientik.RemoteEndPoint == clients[i].RemoteEndPoint)
                 {
                     string clean = "";
-                    for(int j = 0; j< message.Length; j++)
+                    for (int j = 0; j < message.Length; j++)
                     {
                         clean += message[j];
                         if (message[j + 1] == '\0')
@@ -101,11 +111,41 @@ namespace WpfApp1
                         }
                     }
                     us.Add(new input(userk[i], clientik.RemoteEndPoint.ToString(), clean, DateTime.Now));
-                    File.WriteAllText("..\\..\\..\\..\\..\\logi.json", JsonConvert.SerializeObject(us));
+                    File.WriteAllText(pyt("logi.json"), JsonConvert.SerializeObject(us));
                 }
             }
             byte[] bytes = Encoding.UTF8.GetBytes(message);
             await clientik.SendAsync(bytes, SocketFlags.None);
+        }
+
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            close();
+        }
+        void close()
+        {
+            write(pyt("infa.json"));
+            write(pyt("logi.json"));
+            Close();
+            Process.Start(new ProcessStartInfo { FileName = pyt("\\auth\\auth\\bin\\Debug\\net6.0-windows\\auth.exe"), UseShellExecute = true });
+        }
+        string pyt(string paths)
+        {
+            return "..\\..\\..\\..\\..\\" + paths;
+        }
+        void write(string paths)
+        {
+            File.WriteAllText(paths, "");
+        }
+
+        private void Button_Click_1(object sender, RoutedEventArgs e)
+        {
+            close();
+        }
+
+        private void Button_Click_2(object sender, RoutedEventArgs e)
+        {
+            Process.Start(new ProcessStartInfo { FileName = pyt("logi.json"), UseShellExecute = true });
         }
     }
     class des
