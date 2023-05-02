@@ -38,6 +38,7 @@ namespace prak6
                 MessageBox.Show("Кто ты, воин?");
                 return;
             }
+            new Window1().Show();
         }
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
@@ -52,9 +53,12 @@ namespace prak6
                 return;
             }
             Hide();
-            user.name = TextBox_name.Text;
-            user.ip = TextBox_IP.Text;
-            new client().Show();
+            new client(TextBox_name.Text, TextBox_IP.Text).Show();
+        }
+
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            Environment.Exit(0);
         }
     }
 }

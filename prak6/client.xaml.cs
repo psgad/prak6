@@ -25,80 +25,100 @@ namespace prak6
     /// </summary>
     public partial class client : Window
     {
-        Socket client_;
-        public client()
+        public static Socket Client;
+        public client(string Name_client, string IP_client)
         {
             InitializeComponent();
-            conect();
+            Client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            Client.ConnectAsync(IP_client, 13000);
+            Resave(Name_client);/*
+            update_list_users();*/
         }
-        async Task conect()
+        async Task Resave(string b)
         {
-            Socket client_ = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            await client_.ConnectAsync(user.ip, 13000);
-            MessageBox.Show(client_.RemoteEndPoint.ToString());
-            byte[] name = Encoding.UTF8.GetBytes(user.name);
-            client_.SendAsync(name, SocketFlags.None);
-            byte[] bytes = new byte[100];
-            client_.ReceiveAsync(bytes, SocketFlags.None);
-            messages.Items.Add(return_string(bytes));
-
-        }
-        string return_string(byte[] bytes)
-        {
-            return Encoding.UTF8.GetString(bytes);
-        }
-        List<string> return_list(byte[] bytes)
-        {
-            return bytes.Select(byteValue => byteValue.ToString()).ToList();
-        }
-        public async Task ListenClient()
-        {
-
-        }
-        async Task Resave()
-        {
-            byte[] message = new byte[100];
-            await client_.ReceiveAsync(message, SocketFlags.None);
-            string message_ = Encoding.UTF8.GetString(message);
-            string clear_message = "";
-            foreach (char ch in message_)
+            Client.SendAsync(Encoding.UTF8.GetBytes(b), SocketFlags.None);
+            while (true)
             {
-                if (ch != '\0')
-                    clear_message += ch;
+                byte[] message = new byte[200];
+                await Client.ReceiveAsync(message, SocketFlags.None);
+                string msg = clear_string(Encoding.UTF8.GetString(message));
+                if (msg == "/disconnect")
+                {
+                    exit();
+                    return;
+                }
+                messages.Items.Add($"[{DateTime.Now}] : {msg}");
             }
-            messages.Items.Add(clear_message);
+            MessageBox.Show("Server closed!");
+            exit();
         }
-        void SendMessage(Socket client_socket, string message)
+        string clear_string(string str)
         {
-
+            string a = "";
+            foreach (char b in str)
+            {
+                if (b == '\0')
+                    break;
+                a += b;
+            }
+            return a;
+        }
+        async Task update_list_users()
+        {
+            while (true)
+            {
+                Client.SendAsync(Encoding.UTF8.GetBytes("/list"), SocketFlags.None);
+                byte[] count = new byte[3];
+                byte[] user_list = new byte[100];
+                await Client.ReceiveAsync(count, SocketFlags.None);
+                try
+                {
+                    int counts = Convert.ToInt32(clear_string(Encoding.UTF8.GetString(count)));
+                    users.Items.Clear();
+                    for (int i = 0; i < counts * 2; i++)
+                    {
+                        await Client.ReceiveAsync(user_list, SocketFlags.None);
+                        string name = clear_string(Encoding.UTF8.GetString(user_list));
+                        users.Items.Add(name);
+                    }
+                }
+                catch
+                {
+                    update_list_users();
+                }
+            }
+        }
+        async Task SendMessage(string message)
+        {
+            await Client.SendAsync(Encoding.UTF8.GetBytes(message), SocketFlags.None);
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-
+            if (message_text.Text == "")
+                return;
+            if (message_text.Text.Contains("/disconnect"))
+            {
+                exit();
+                return;
+            }
+            SendMessage(message_text.Text);
         }
-    }
-    class input
-    {
-        public string name;
-        public string IP;
-        public string message;
-        public DateTime date;
-        public input(string name, string iP, string message, DateTime date)
+        async Task exit()
         {
-            this.name = name;
-            IP = iP;
-            this.message = message;
-            this.date = date;
+            await Client.SendAsync(Encoding.UTF8.GetBytes("/disconnect"), SocketFlags.None);
+            Close();
+            new MainWindow().Show();
+        }
+
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            exit();
+        }
+
+        private void Button_Click_1(object sender, RoutedEventArgs e)
+        {
+            exit();
         }
     }
-    class user
-    {
-        public static string name;
-        public static string ip;
-        public static Socket client_sock;
-        public static List<string> Names = new List<string>();
-        public static List<Socket> Sockets = new List<Socket>();
-    }
-
 }
