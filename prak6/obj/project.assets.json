@@ -61,11 +61,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\user\\Desktop\\prak6\\prak6\\prak6.csproj",
+      "projectUniqueName": "C:\\Users\\user\\Desktop\\prak6_\\prak6\\prak6.csproj",
       "projectName": "prak6",
-      "projectPath": "C:\\Users\\user\\Desktop\\prak6\\prak6\\prak6.csproj",
+      "projectPath": "C:\\Users\\user\\Desktop\\prak6_\\prak6\\prak6.csproj",
       "packagesPath": "C:\\Users\\user\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\user\\Desktop\\prak6\\prak6\\obj\\",
+      "outputPath": "C:\\Users\\user\\Desktop\\prak6_\\prak6\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
