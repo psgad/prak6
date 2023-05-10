@@ -25,7 +25,36 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
 namespace prak6
+
+
 {
+
+    public class Message
+    {
+        public string name;
+        public DateTime time;
+        public string content;
+        public int type;
+
+        public Message(string nm, DateTime dt, string content, int type)
+        {
+            name = nm;
+            time = dt;
+            this.content = content;
+            this.type = type;
+        }
+
+    }
+
+    public static class Serl
+    {
+        public static readonly string PATH = $"{Environment.GetEnvironmentVariable("USERPROFILE")}\\log.txt";
+        public static void write(List<string> list)
+        {
+            File.WriteAllLines(PATH, list);
+        }
+    }
+
     public partial class client : Window
     {
         private Socket Client;
@@ -43,6 +72,11 @@ namespace prak6
 
         Dictionary<Socket, string> users_ = new Dictionary<Socket, string>();
 
+        public static List<string> logs = new List<string>();
+
+        private readonly string ignore_msg = "$@-@$";
+
+        private List<string> ign = new List<string>();
         public client(string Name, string ip_addr)
         {
 
@@ -78,7 +112,20 @@ namespace prak6
         private async void cheked()
         {
             if (CommType == 1)
+            {
+                if (File.Exists(Serl.PATH))
+                {
+                    string line;
+                    var reader = new StreamReader(Serl.PATH);
+                    while ((line = reader.ReadLine()) != null)
+                    {
+                        logs.Add(line);
+                    }
+                    reader.Close();
+                }
                 listen();
+
+            }
             else
                 await recv();
 
@@ -95,12 +142,24 @@ namespace prak6
                         messages.Items.Add("Здесь пусто");
                         return;
                     }
+
+                    if (msg.Text == "/disconnect")
+                    {
+                        messages.Items.Add("Мы не можем вас отключить!");
+                        return;
+                    }
+
                     string info = $"[{DateTime.Now}] {name}: {msg.Text}";
+
+
+
                     messages.Items.Add(info);
                     foreach (var i in users_.Keys.ToList())
                     {
                         Sending(i, info);
                     }
+                    logs.Add($"[{DateTime.Now}] сообщение от {name}: {msg.Text}");
+                    Serl.write(logs);
                     break;
                 case 2:
                     if (isConnected == false)
@@ -111,7 +170,10 @@ namespace prak6
                     if (msg.Text == "/disconnect")
                         close();
                     else
+                    {
                         Client.SendAsync(Encoding.UTF8.GetBytes(msg.Text), SocketFlags.None);
+                    }
+
                     break;
             }
         }
@@ -140,14 +202,30 @@ namespace prak6
                     var list = new byte[100];
                     await Client.ReceiveAsync(list, SocketFlags.None);
                     users.ItemsSource = Deserialize(list);
-                    messages.Items.Add($"{Encoding.UTF8.GetString(bt)}");
+                    string message = Encoding.UTF8.GetString(bt);
+
+                    string final = GetString(bt);
+
+
+                    if (final == ignore_msg)
+                    {
+                        ign.Add(final);
+                    }
+                    else
+                    {
+                        messages.Items.Add(final);
+                    }
+
+                    ign.Clear();
+
+
                 }
 
                 catch (SocketException)
                 {
                     if (users.ItemsSource != null)
                     {
-                        messages.Items.Add($"Клиент {users.Items[0]} Покинул сервер!");
+                        messages.Items.Add($"Клиент {users.Items[0]} покинул сервер!");
                         await Client.DisconnectAsync(true);
                         users.ItemsSource = null;
                         users.Items.Clear();
@@ -173,13 +251,14 @@ namespace prak6
             return JsonConvert.DeserializeObject<List<string>>(t);
 
         }
-        private async void disconnect_(object sender, EventArgs e)
+        private async void disconnect_(object sender, EventArgs e) // событие закрытия
         {
             if (CommType == 1)
             {
                 if (users_.Count == 0)
                 {
-                    Hide();
+                    Client.Dispose();
+                    Client.Close();
                     new MainWindow().Show();
                 }
                 else
@@ -188,9 +267,13 @@ namespace prak6
                     {
                         await Sending(sock, $"Сервер {name} покинул нас!");
                     }
+
+                    logs.Add($"[{DateTime.Now}]: {name} отключился");
+                    Serl.write(logs);
+
+                    Client.Dispose();
                     Client.Close();
                     users_.Clear();
-                    Hide();
                     new MainWindow().Show();
                 }
             }
@@ -219,17 +302,20 @@ namespace prak6
                 else
                 {
                     users_.Add(socket, GetName(client_name));
-                    string ms = $"пользователь {users_[socket]} подключился!";
+                    string ms = $"Пользователь {users_[socket]} подключился!";
                     foreach (var i in users_.Keys.ToList())
                     {
-                        await i.SendAsync(Encoding.UTF8.GetBytes(ms), SocketFlags.None);
+                        await i.SendAsync(Encoding.UTF8.GetBytes(ignore_msg), SocketFlags.None);
                         Thread.Sleep(500);
                         await i.SendAsync(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(users_.Values.ToList(), SerializerSettings)), SocketFlags.None);
                     }
                     users.ItemsSource = users_.Values.ToList();
                 }
 
-                messages.Items.Add($"пользователь {users_[socket]} подключился!");
+                logs.Add($"[{DateTime.Now}]: {users_[socket]} подключился");
+                Serl.write(logs);
+
+                messages.Items.Add($"Пользователь {users_[socket]} подключился!");
                 users.ItemsSource = users_.Values.ToList();
                 receive(socket);
             }
@@ -240,9 +326,22 @@ namespace prak6
             {
                 if (!IsConnected(client_))
                 {
-                    messages.Items.Add($"[{DateTime.Now}] Пользователь {users_[client_]} отлючился!");
+                    messages.Items.Add($"[{DateTime.Now}]: Пользователь {users_[client_]} отключился!");
+                    logs.Add($"[{DateTime.Now}]: {users_[client_]} отключился");
+                    Serl.write(logs);
+
+                    string tmp_name = users_[client_];
                     await client_.DisconnectAsync(true);
                     users_.Remove(client_);
+
+                    foreach (var sock in users_.Keys.ToList())
+                    {
+                        await sock.SendAsync(Encoding.UTF8.GetBytes(ignore_msg), SocketFlags.None);
+                        Thread.Sleep(500);
+                        await sock.SendAsync(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(users_.Values.ToList(), SerializerSettings)), SocketFlags.None);
+                    }
+
+
                     users.ItemsSource = users_.Values.ToList();
                     break;
                 }
@@ -257,15 +356,24 @@ namespace prak6
                 }
                 if (Equals(msg, "/disconnect"))
                 {
-                    messages.Items.Add($"[{DateTime.Now}]: пользователь {users_[client_]} отключился!");
+                    messages.Items.Add($"[{DateTime.Now}]: Пользователь {users_[client_]} отключился!");
+                    logs.Add($"[{DateTime.Now}]: {users_[client_]} отключился");
+                    Serl.write(logs);
+
+                    string tmp_name = users_[client_];
+                    await client_.DisconnectAsync(true);
                     users_.Remove(client_);
-                    users.ItemsSource = users_.Values.ToList();
+
                     foreach (var sock in users_.Keys.ToList())
                     {
-                        await sock.SendAsync(Encoding.UTF8.GetBytes($"[{DateTime.Now}]: пользователь {users_[client_]} отключился!"), SocketFlags.None);
+                        await sock.SendAsync(Encoding.UTF8.GetBytes(ignore_msg), SocketFlags.None);
                         Thread.Sleep(500);
                         await sock.SendAsync(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(users_.Values.ToList(), SerializerSettings)), SocketFlags.None);
                     }
+
+
+                    users.ItemsSource = users_.Values.ToList();
+                    break;
                 }
                 else
                 {
@@ -276,18 +384,31 @@ namespace prak6
                         await Iter.SendAsync(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(users_.Values.ToList(), SerializerSettings)), SocketFlags.None);
                     }
                     messages.Items.Add($"[{DateTime.Now}] {users_[client_]} : {msg}");
+
+                    logs.Add($"[{DateTime.Now}] {users_[client_]}: {msg}");
+                    Serl.write(logs);
+
+
+
                 }
                 if (!IsConnected(client_))
                 {
-                    users_.Remove(client_);
-                    foreach (var Iter in users_.Keys.ToList())
-                    {
-                        await Iter.SendAsync(Encoding.UTF8.GetBytes($"[{DateTime.Now}] пользователь {users_[client_]} отключился!"), SocketFlags.None);
-                        Thread.Sleep(500);
-                        await Iter.SendAsync(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(users_.Values.ToList(), SerializerSettings)), SocketFlags.None);
-                    }
+                    messages.Items.Add($"[{DateTime.Now}]: Пользователь {users_[client_]} отключился!");
+                    logs.Add($"[{DateTime.Now}]: {users_[client_]} отключился");
+                    Serl.write(logs);
+
+                    string tmp_name = users_[client_];
                     await client_.DisconnectAsync(true);
-                    messages.Items.Add($"[{DateTime.Now}] пользователь {users_[client_]} отключился!");
+                    users_.Remove(client_);
+
+                    foreach (var sock in users_.Keys.ToList())
+                    {
+                        await sock.SendAsync(Encoding.UTF8.GetBytes(ignore_msg), SocketFlags.None);
+                        Thread.Sleep(500);
+                        await sock.SendAsync(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(users_.Values.ToList(), SerializerSettings)), SocketFlags.None);
+                    }
+
+
                     users.ItemsSource = users_.Values.ToList();
                     break;
                 }
@@ -311,6 +432,7 @@ namespace prak6
             await s.SendAsync(bt, SocketFlags.None);
             Thread.Sleep(500);
             await s.SendAsync(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(users_.Values.ToList(), SerializerSettings)), SocketFlags.None);
+
         }
 
         private bool IsConnected(Socket i)
@@ -327,19 +449,58 @@ namespace prak6
         {
             close();
         }
-
-        private async void Window_Closed(object sender, EventArgs e)
-        {
-            close();
-        }
         async void close()
         {
-            await Client.SendAsync(Encoding.UTF8.GetBytes("/disconnect"), SocketFlags.None);
-            await Client.DisconnectAsync(true);
-            users.ItemsSource = null;
-            isConnected = false;
-            Close();
-            new MainWindow().Show();
+            if (CommType == 1)
+            {
+                foreach (var sock in users_.Keys.ToList())
+                {
+                    await Sending(sock, $"Сервер {name} покинул нас!");
+                }
+
+
+                users_.Clear();
+                Client.Dispose();
+                Client.Close();
+                users.ItemsSource = null;
+                Thread.Sleep(500);
+                Close();
+            }
+            else
+            {
+                await Client.SendAsync(Encoding.UTF8.GetBytes("/disconnect"), SocketFlags.None);
+                await Client.DisconnectAsync(true);
+                users.ItemsSource = null;
+                isConnected = false;
+                Client.Dispose();
+                Client.Close();
+                Thread.Sleep(500);
+                Close();
+            }
+        }
+
+        private void Open(object sender, RoutedEventArgs e)
+        {
+            log_window log = new log_window();
+            log.Show();
+        }
+        /// <summary>
+        /// Gets string without garbage
+        /// </summary>
+        /// <returns></returns>
+        private string GetString(byte[] dirty)
+        {
+            int i = 0;
+            string str = null;
+            char[] some = Encoding.UTF8.GetChars(dirty);
+
+            while (some[i] != '\0')
+            {
+                str += some[i];
+                i++;
+            }
+
+            return str;
         }
     }
 }
